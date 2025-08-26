@@ -1,5 +1,5 @@
 [package]
-name = "author-book-management-system"
+name = "rust-axum-author-book-management-system"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,3 +10,4 @@ serde_json = "1.0.104"
 tokio = { version = "1.29.1", features = ["full"] }
 tracing = "0.1.37"
 tracing-subscriber = "0.3.17"
+openssl = "0.10"
