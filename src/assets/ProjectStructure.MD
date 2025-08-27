@@ -1,13 +1,16 @@
 # Project structure:
 rust-axum-author-book-management-system/
 ├── Cargo.toml
-├── src/
-│   ├── main.rs
-│   ├── models/
-│   │   └── authors.rs
-│   ├── routes/
-│   │   └── authors.rs
-│   └── db.rs
+├── .env
+└── src/
+    ├── main.rs
+    ├── db.rs
+    ├── models/
+    │   ├── mod.rs
+    │   └── authors.rs
+    └── routes/
+        ├── mod.rs
+        └── authors.rs
 
         
 # Start a project in current folder

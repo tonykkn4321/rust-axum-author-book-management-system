@@ -1,10 +1,15 @@
 use axum::{routing::get, Router};
-use dotenvy::dotenv;
-use std::env;
 use std::net::SocketAddr;
+use tokio::net::TcpListener;
 use tracing_subscriber;
-use rust_axum_author_book_management_system::db::connect_db;
-use rust_axum_author_book_management_system::routes::authors::list_authors;
+use dotenvy::dotenv;
+
+mod db;
+mod models;
+mod routes;
+
+use crate::db::connect_db;
+use crate::routes::authors::list_authors;
 
 #[tokio::main]
 async fn main() {
@@ -17,10 +22,15 @@ async fn main() {
         .route("/authors", get(list_authors))
         .with_state(pool);
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let port: u16 = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .expect("PORT must be a number");
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    let listener = TcpListener::bind(addr).await.unwrap();
+
     tracing::info!("Listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+
+    axum::serve(listener, app).await.unwrap();
 }
