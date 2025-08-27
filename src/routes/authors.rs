@@ -1,7 +1,12 @@
 use axum::{extract::{Path, State}, http::StatusCode, Json};
 use sqlx::PgPool;
-use crate::models::authors::Author;
 use serde::Deserialize;
+
+#[derive(Deserialize)]
+pub struct NewAuthor {
+    pub first_name: String,
+    pub last_name: String,
+}
 
 #[derive(Deserialize)]
 pub struct UpdateAuthor {
@@ -9,50 +14,22 @@ pub struct UpdateAuthor {
     pub last_name: Option<String>,
 }
 
-pub async fn patch_author(
-    Path(id): Path<i32>,
-    State(pool): State<PgPool>,
-    Json(payload): Json<UpdateAuthor>,
-) -> Result<StatusCode, StatusCode> {
-    if payload.first_name.is_none() && payload.last_name.is_none() {
-        return Ok(StatusCode::BAD_REQUEST);
-    }
+pub async fn list_authors(State(_pool): State<PgPool>) -> Json<Vec<String>> {
+    Json(vec!["Author A".to_string(), "Author B".to_string()])
+}
 
-    let mut query = String::from("UPDATE authors SET ");
-    let mut args: Vec<(String, String)> = vec![];
+pub async fn create_author(State(_pool): State<PgPool>, Json(_payload): Json<NewAuthor>) -> StatusCode {
+    StatusCode::CREATED
+}
 
-    if let Some(first_name) = payload.first_name {
-        query.push_str("first_name = $1");
-        args.push(("first_name".to_string(), first_name));
-    }
+pub async fn replace_author(Path(_id): Path<i32>, State(_pool): State<PgPool>, Json(_payload): Json<NewAuthor>) -> StatusCode {
+    StatusCode::OK
+}
 
-    if let Some(last_name) = payload.last_name {
-        if !args.is_empty() {
-            query.push_str(", ");
-        }
-        query.push_str("last_name = $2");
-        args.push(("last_name".to_string(), last_name));
-    }
+pub async fn patch_author(Path(_id): Path<i32>, State(_pool): State<PgPool>, Json(_payload): Json<UpdateAuthor>) -> StatusCode {
+    StatusCode::OK
+}
 
-    query.push_str(" WHERE id = $3");
-
-    let result = match args.len() {
-        1 => sqlx::query(&query)
-            .bind(&args[0].1)
-            .bind(id)
-            .execute(&pool)
-            .await,
-        2 => sqlx::query(&query)
-            .bind(&args[0].1)
-            .bind(&args[1].1)
-            .bind(id)
-            .execute(&pool)
-            .await,
-        _ => unreachable!(),
-    };
-
-    match result {
-        Ok(_) => Ok(StatusCode::OK),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-    }
+pub async fn delete_author(Path(_id): Path<i32>, State(_pool): State<PgPool>) -> StatusCode {
+    StatusCode::NO_CONTENT
 }

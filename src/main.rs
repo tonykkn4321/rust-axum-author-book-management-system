@@ -5,6 +5,7 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tracing_subscriber;
 use dotenvy::dotenv;
+use axum::routing::{get, post, put, patch, delete};
 
 mod db;
 mod models;
